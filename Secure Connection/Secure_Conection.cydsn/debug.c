@@ -172,7 +172,6 @@ void DebugOut(uint32 event, void* eventParam)
             printf("EVT_GAP_ENCRYPT_CHANGE: %d \r\n", *(uint8 *)eventParam);
             break;
 
-
         /**********************************************************
         *                       GATT Events
         ***********************************************************/
