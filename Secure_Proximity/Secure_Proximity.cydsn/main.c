@@ -99,7 +99,7 @@ int main()
 
             /* Update link loss alert LED status based on IAS Alert level characteristic */
             if(CyBle_GetState() == CYBLE_STATE_DISCONNECTED || 
-                (CyBle_GetState() == CYBLE_STATE_CONNECTED && CyBle_GetRssi() < RSSI_THRESHOLD))
+                (CyBle_GetState() == CYBLE_STATE_CONNECTED && CyBle_GetRssi() > RSSI_THRESHOLD))
             {
                 switch(linkAlertLevel)
                 {
