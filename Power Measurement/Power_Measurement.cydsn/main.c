@@ -19,15 +19,13 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "hrss.h"
-#include "bass.h"
+#include <Project.h>
 
 #define ENABLE_850_XTAL_STARTUP   1
-#define ENABLE_WENDEY_CHNAGES     0
-#define SUPER_AWESOME_POWER       1
-#define DEBUG_ENABLE              0
-#define NOTIF_INTERVAL_FOUR_SEC   0
 #define CON_PARAM_UPDATE          1
+#define SEND_NOTIFICATIONS        0
+#define NOTIF_INTERVAL_FOUR_SEC   0
+#define DEBUG_ENABLE              0
 
 #if CON_PARAM_UPDATE
     #define NOTIFICATION_OFFSET   10
@@ -69,17 +67,9 @@ void AppCallBack(uint32 event, void* eventParam)
         
             #if ENABLE_850_XTAL_STARTUP
             clockConfig.bleLlClockDiv = CYBLE_LL_ECO_CLK_DIV_2;
-            clockConfig.bleLlSca = CYBLE_LL_SCA_000_TO_020_PPM;
-            clockConfig.ecoXtalStartUpTime = 13; /* Crystal startup = 1250us */
+            clockConfig.bleLlSca = CYBLE_LL_SCA_031_TO_050_PPM;
+            clockConfig.ecoXtalStartUpTime = 15; 
             CyBle_SetBleClockCfgParam(&clockConfig);
-            #endif
-            
-            #if ENABLE_WENDEY_CHNAGES
-            CY_SET_XTND_REG32((void CYFAR *)CYREG_BLE_BLERD_RCCAL,0x5210);           
-            CY_SET_XTND_REG32((void CYFAR *)CYREG_BLE_BLERD_MODEM,0x16EC);          
-
-            CY_SET_XTND_REG32((void CYFAR *)(CYREG_BLE_BLERD_LDO), 0x0B58);
-            CY_SET_XTND_REG32((void CYFAR *)(CYREG_BLE_BLERD_BB_BUMP2), 0x0007);
             #endif
 
             /* Put the device into discoverable mode so that remote can search it. */
@@ -122,8 +112,11 @@ int main()
 {
     CYBLE_LP_MODE_T lpMode;
     CYBLE_BLESS_STATE_T blessState;
+    
+    #if SEND_NOTIFICATIONS
     uint8 notifyValue = 60;
     uint8 heartRatePacket[2] = {0x01, 60};
+    #endif
 
     CyGlobalIntEnable;
     
@@ -164,6 +157,7 @@ int main()
                     Pin_1_Write(0);
                     #endif
                     
+                    #if SEND_NOTIFICATIONS
                     if(blessState == CYBLE_BLESS_STATE_DEEPSLEEP && notificationState)
                     {
                         if(initCount < NOTIFICATION_OFFSET) /* Wait for 'X' connection intervals before starting notifications */
@@ -188,6 +182,7 @@ int main()
                             }
                         }
                     }
+                    #endif
                 }
             }
             else
@@ -196,17 +191,11 @@ int main()
                 Pin_2_Write(1);
                 #endif
                 
-                #if SUPER_AWESOME_POWER
                 CySysClkWriteHfclkDirect(CY_SYS_CLK_HFCLK_ECO);
                 CySysClkImoStop();
                 CySysPmSleep();
                 CySysClkImoStart();
                 CySysClkWriteHfclkDirect(CY_SYS_CLK_HFCLK_IMO);
-                #else
-                CySysClkWriteImoFreq(3);
-                CySysPmSleep();
-                CySysClkWriteImoFreq(16);
-                #endif
                 
                 #if DEBUG_ENABLE
                 Pin_2_Write(0);
