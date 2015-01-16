@@ -21,14 +21,15 @@
 
 #include <Project.h>
 
-#define ENABLE_850_XTAL_STARTUP   1
-#define CON_PARAM_UPDATE          1
-#define SEND_NOTIFICATIONS        0
-#define NOTIF_INTERVAL_FOUR_SEC   0
-#define DEBUG_ENABLE              0
+#define ENABLE_850_XTAL_STARTUP   1  /* Required to configure slave clock accuracy to 50ppm. Don't disable this */
+#define CON_PARAM_UPDATE          1  /* When enabled, updated BLE connection interval to 1 second */
+#define SEND_NOTIFICATIONS        0  /* Enables firmware to send HRM notifications when CCCD is enabled */
+#define NOTIF_INTERVAL_FOUR_SEC   0  /* Sends HRM notification once in 4 connection intervals. If connection interval 
+                                      * is 1 sec, then the firmware sends notifications every 4 seconds */
+#define DEBUG_ENABLE              0  /* Enables GPIO toggling on different power modes. Poor man's power profiler */
 
 #if CON_PARAM_UPDATE
-    #define NOTIFICATION_OFFSET   10
+    #define NOTIFICATION_OFFSET   10 /* When to start sending notification after CCCD is enabled */
 #else
     #define NOTIFICATION_OFFSET   1
 #endif    
@@ -90,6 +91,18 @@ void AppCallBack(uint32 event, void* eventParam)
     }
 }
 
+/*******************************************************************************
+* Function Name: HeartRateCallBack(uint32 event, void* eventParam)
+********************************************************************************
+*
+* Summary:
+*   This is an event callback function to receive events from the Heart Rate Service.
+*
+* Parameters:
+*  event - the event code
+*  *eventParam - the event parameters
+*
+*******************************************************************************/
 void HeartRateCallBack(uint32 event, void* eventParam)
 {
     switch(event)
@@ -108,10 +121,21 @@ void HeartRateCallBack(uint32 event, void* eventParam)
     }
 }
 
+/*******************************************************************************
+* Function Name: int main()
+********************************************************************************
+*
+* Summary:
+*   Main entry point for the project. 
+*
+* Parameters: None
+*  
+*******************************************************************************/
 int main()
 {
     CYBLE_LP_MODE_T lpMode;
     CYBLE_BLESS_STATE_T blessState;
+    uint32 intStatus;
     
     #if SEND_NOTIFICATIONS
     uint8 notifyValue = 60;
@@ -122,12 +146,13 @@ int main()
     
     CySysClkIloStop();
     
-    /* Start CYBLE component and register generic event handler */
+    /* Start the BLE component and register generic event handler */
     apiResult = CyBle_Start(AppCallBack);
     
     /* Services initialization */
     CyBle_HrsRegisterAttrCallback(HeartRateCallBack);
     
+    /* Set XTAL divider to 3MHz mode */
     CySysClkWriteEcoDiv(CY_SYS_CLK_ECO_DIV8);            
     
     /***************************************************************************
@@ -140,7 +165,8 @@ int main()
             /* Enter DeepSleep mode between connection intervals */
             lpMode = CyBle_EnterLPM(CYBLE_BLESS_DEEPSLEEP);
             
-            CyGlobalIntDisable;
+            intStatus = CyEnterCriticalSection();
+            
             blessState = CyBle_GetBleSsState();
 
             if(lpMode == CYBLE_BLESS_DEEPSLEEP)
@@ -156,33 +182,6 @@ int main()
                     #if DEBUG_ENABLE
                     Pin_1_Write(0);
                     #endif
-                    
-                    #if SEND_NOTIFICATIONS
-                    if(blessState == CYBLE_BLESS_STATE_DEEPSLEEP && notificationState)
-                    {
-                        if(initCount < NOTIFICATION_OFFSET) /* Wait for 'X' connection intervals before starting notifications */
-                        {
-                            initCount++;
-                        }
-                        else
-                        {
-                            notifyValue++;
-                            
-                            #if NOTIF_INTERVAL_FOUR_SEC
-                            if(notifyValue % 4 == 0)    
-                            #endif    
-                            {
-                                if(notifyValue > 160)
-                                {
-                                    notifyValue = 60;   
-                                }
-                                heartRatePacket[1] = notifyValue;
-                               
-                                CyBle_HrssSendNotification(connHandle, CYBLE_HRS_HRM, sizeof(heartRatePacket), heartRatePacket);
-                            }
-                        }
-                    }
-                    #endif
                 }
             }
             else
@@ -197,11 +196,39 @@ int main()
                 CySysClkImoStart();
                 CySysClkWriteHfclkDirect(CY_SYS_CLK_HFCLK_IMO);
                 
+                #if SEND_NOTIFICATIONS
+                CyExitCriticalSection(intStatus);
+                if(blessState == CYBLE_BLESS_STATE_ECO_STABLE && notificationState)
+                {
+                    if(initCount < NOTIFICATION_OFFSET) /* Wait for 'X' connection intervals before starting notifications */
+                    {
+                        initCount++;
+                    }
+                    else
+                    {
+                        notifyValue++;
+                        
+                        #if NOTIF_INTERVAL_FOUR_SEC
+                        if(notifyValue % 4 == 0)    
+                        #endif    
+                        {
+                            if(notifyValue > 160)
+                            {
+                                notifyValue = 60;   
+                            }
+                            heartRatePacket[1] = notifyValue;
+                           
+                            CyBle_HrssSendNotification(connHandle, CYBLE_HRS_HRM, sizeof(heartRatePacket), heartRatePacket);
+                        }
+                    }
+                }
+                #endif                
+                
                 #if DEBUG_ENABLE
                 Pin_2_Write(0);
                 #endif
             }
-            CyGlobalIntEnable;
+            CyExitCriticalSection(intStatus);
         }
              
         /*******************************************************************
