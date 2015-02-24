@@ -30,8 +30,11 @@ typedef enum
 *       UI Constants
 ***************************************/
 #define NO_FINGER_ON_SLIDER                         0xFFFF
-#define NO_UI_STATE_CHANGE                          0xFFFE
+#define NO_UI_STATE_CHANGE                          0xFFEE
+
 #define MAX_SLIDER_CENTROID                         (100u)
+#define NUMBER_OF_CENTROID_SEGMENTS                 (10)
+#define CENTROID_DIVIDE_FACTOR                      (MAX_SLIDER_CENTROID/NUMBER_OF_CENTROID_SEGMENTS)
 
 #define IsUIEnabled()                               IsMidiEnabled()
 

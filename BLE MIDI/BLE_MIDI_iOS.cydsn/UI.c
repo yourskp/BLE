@@ -78,6 +78,12 @@ uint16 UI_Run(void)
                 {
                     CapSense_UpdateEnabledBaselines(); /* Keep the baseline updated with current performance numbers */
                     currentSliderPosition = CapSense_GetCentroidPos(CapSense_LINEARSLIDER0__LS);
+                    
+                    if(currentSliderPosition != NO_FINGER_ON_SLIDER)
+                    {
+                        currentSliderPosition =  currentSliderPosition / CENTROID_DIVIDE_FACTOR;
+                    }
+                    
                     uiState = UI_RESULT_STATE;  
                 }
             break;
@@ -86,8 +92,8 @@ uint16 UI_Run(void)
                 if(currentSliderPosition != previousSliderPosition)
                 {
                     uiChangeStatus = currentSliderPosition;
+                    previousSliderPosition = currentSliderPosition;
                 }
-                previousSliderPosition = currentSliderPosition;
                 uiState = UI_IDLE_STATE;  
             break;
                 

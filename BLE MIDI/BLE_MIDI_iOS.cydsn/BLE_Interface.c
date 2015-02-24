@@ -27,15 +27,15 @@ static CYBLE_GAP_CONN_UPDATE_PARAM_T midiConnectionParam[] =
 {
     /* Connection parameter low latency */
     {
-        9,        /* Minimum connection interval of 11.25 ms */
-        9,        /* Maximum connection interval of 11.25 ms */
+        8,        /* Minimum connection interval of 11.25 ms */
+        10,        /* Maximum connection interval of 11.25 ms */
         0,          /* Slave latency */
         100        /* Supervision timeout of 5 seconds */
     },
     /* Connection parameter mid latency */
     {
-        12,        /* Minimum connection interval of 15 ms */
-        12,        /* Maximum connection interval of 15 ms */
+        11,        /* Minimum connection interval of 15 ms */
+        13,        /* Maximum connection interval of 15 ms */
         0,          /* Slave latency */
         100        /* Supervision timeout of 1 seconds */
     },
@@ -146,7 +146,6 @@ void StackEventHandler(uint32 event, void *eventParam)
              * status on LEDs */
             CyBle_GappStartAdvertisement(CYBLE_ADVERTISING_FAST);
             Advertising_LED_Write(LED_ON);
-            PWM_WriteCompare(LED_NO_ALERT);
             
             /* Re-initialize the BLE interface */
             BLE_StateInit();

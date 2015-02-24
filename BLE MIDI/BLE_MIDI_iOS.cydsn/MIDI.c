@@ -198,7 +198,7 @@ static void Midi_GenerateMessages(uint16 uiChangeStatus)
             [midiBuffer.midiPacket[midiBuffer.packetIndex].dataIndex++] = MIDI_NOTE_ON_CHANNEL_0;
             
             midiBuffer.midiPacket[midiBuffer.packetIndex].midiNotificationPacket\
-            [midiBuffer.midiPacket[midiBuffer.packetIndex].dataIndex++] = (uint8)previousUiChangeStatus;
+            [midiBuffer.midiPacket[midiBuffer.packetIndex].dataIndex++] = (uint8)previousUiChangeStatus + MIDI_NOTE_OFFSET;
             
             midiBuffer.midiPacket[midiBuffer.packetIndex].midiNotificationPacket\
             [midiBuffer.midiPacket[midiBuffer.packetIndex].dataIndex++] = MIDI_NOTE_VELOCITY_OFF;
@@ -216,7 +216,7 @@ static void Midi_GenerateMessages(uint16 uiChangeStatus)
             [midiBuffer.midiPacket[midiBuffer.packetIndex].dataIndex++] = MIDI_NOTE_ON_CHANNEL_0;
             
             midiBuffer.midiPacket[midiBuffer.packetIndex].midiNotificationPacket\
-            [midiBuffer.midiPacket[midiBuffer.packetIndex].dataIndex++] = (uint8)uiChangeStatus;
+            [midiBuffer.midiPacket[midiBuffer.packetIndex].dataIndex++] = (uint8)uiChangeStatus + MIDI_NOTE_OFFSET;
             
             midiBuffer.midiPacket[midiBuffer.packetIndex].midiNotificationPacket\
             [midiBuffer.midiPacket[midiBuffer.packetIndex].dataIndex++] = MIDI_NOTE_VELOCITY_ON;
