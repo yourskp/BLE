@@ -23,14 +23,18 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "WriteUserSFlash.h"
+#include <Project.h>
+#include <WriteUserSFlash.h>
 
+#if defined (__GNUC__)
+#pragma GCC optimize ("O0")
+#endif    
 uint32 WriteUserSFlashRow(uint8 userrow_num, uint32 *write_value)
 {
     uint8 local_count;
-	uint32 retvalue=0;
-	uint32 sram_cmd_data_buffer[(CY_FLASH_SIZEOF_ROW/4) + 2];
-	uint32 reg1,reg2,reg3,reg4,reg5,reg6;
+	volatile uint32 retvalue=0;
+	volatile uint32 sram_cmd_data_buffer[(CY_FLASH_SIZEOF_ROW/4) + 2];
+	volatile uint32 reg1,reg2,reg3,reg4,reg5,reg6;
 	
 	/* Store the clock settings temporarily */
     reg1 =	CY_GET_XTND_REG32((void CYFAR *)(CYREG_CLK_SELECT));
@@ -63,7 +67,7 @@ uint32 WriteUserSFlashRow(uint8 userrow_num, uint32 *write_value)
 	}
 	
 	/* Write the following to registers to execute a LOAD FLASH bytes */
-	CY_SET_REG32(CYREG_CPUSS_SYSARG, sram_cmd_data_buffer);
+	CY_SET_REG32(CYREG_CPUSS_SYSARG, &sram_cmd_data_buffer[0]);
 	CY_SET_REG32(CYREG_CPUSS_SYSREQ, LOAD_FLASH);
 	
     /****** Initialize SRAM parameters for the WRITE ROW command ******/
@@ -81,21 +85,24 @@ uint32 WriteUserSFlashRow(uint8 userrow_num, uint32 *write_value)
 	sram_cmd_data_buffer[1] = (uint32) userrow_num;
 	
 	/* Write the following to registers to execute a WRITE USER SFLASH ROW command */
-	CY_SET_REG32(CYREG_CPUSS_SYSARG, sram_cmd_data_buffer);
+	CY_SET_REG32(CYREG_CPUSS_SYSARG, &sram_cmd_data_buffer[0]);
 	CY_SET_REG32(CYREG_CPUSS_SYSREQ, WRITE_USER_SFLASH_ROW);
-	
+    
 	/* Read back SYSARG for the result. 0xA0000000 = SUCCESS; */
 	retvalue = CY_GET_REG32(CYREG_CPUSS_SYSARG);
 	
 	/* Restore the clock settings after the flash programming is done */
-    reg1 =	CY_SET_XTND_REG32((void CYFAR *)(CYREG_CLK_SELECT),reg1);
-    reg2 =  CY_SET_XTND_REG32((void CYFAR *)(CYREG_CLK_IMO_CONFIG),reg2);
-    reg3 =  CY_SET_XTND_REG32((void CYFAR *)(CYREG_PWR_BG_TRIM4),reg3);
-    reg4 =  CY_SET_XTND_REG32((void CYFAR *)(CYREG_PWR_BG_TRIM5),reg4);
-    reg5 =  CY_SET_XTND_REG32((void CYFAR *)(CYREG_CLK_IMO_TRIM1),reg5);
-    reg6 =  CY_SET_XTND_REG32((void CYFAR *)(CYREG_CLK_IMO_TRIM2),reg6);  
+    CY_SET_XTND_REG32((void CYFAR *)(CYREG_CLK_SELECT),reg1);
+    CY_SET_XTND_REG32((void CYFAR *)(CYREG_CLK_IMO_CONFIG),reg2);
+    CY_SET_XTND_REG32((void CYFAR *)(CYREG_PWR_BG_TRIM4),reg3);
+    CY_SET_XTND_REG32((void CYFAR *)(CYREG_PWR_BG_TRIM5),reg4);
+    CY_SET_XTND_REG32((void CYFAR *)(CYREG_CLK_IMO_TRIM1),reg5);
+    CY_SET_XTND_REG32((void CYFAR *)(CYREG_CLK_IMO_TRIM2),reg6);  
 	
 	return retvalue;
 }
+#if defined (__GNUC__)
+#pragma GCC reset_options
+#endif    
 
 /* [] END OF FILE */

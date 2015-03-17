@@ -31,7 +31,7 @@ char HexToAscii(uint8 value, uint8 nibble);
 
 #define SWITCH_PRESSED                  (0u)
 #define USER_SFLASH_ROW_SIZE            (128u)
-#define SFLASH_STARTING_VALUE           (0x00)
+#define SFLASH_STARTING_VALUE           (0x80)
 #define USER_SFLASH_ROWS                (4u)
 #define USER_SFLASH_BASE_ADDRESS        (0x0ffff200u)
 
@@ -55,9 +55,24 @@ int main()
         
         for(rowIndex = 0; rowIndex < USER_SFLASH_ROWS; rowIndex++)
         {
+            uint32 status;
+            
             UART_Console_UartPutString("\r\nWriting user SFLASH row");
             UART_Console_UartPutChar('0' + rowIndex);
-            WriteUserSFlashRow(rowIndex, &data[0]);
+            status  = WriteUserSFlashRow(rowIndex, &data[0]);
+            
+            if(status == USER_SFLASH_WRITE_SUCCESSFUL)
+            {
+                UART_Console_UartPutString(" successful");
+            }
+            else
+            {
+                UART_Console_UartPutString(" failed - ");
+                UART_Console_UartPutChar(HexToAscii(HI8(HI16(status)),1));
+                UART_Console_UartPutChar(HexToAscii(HI8(HI16(status)),0));
+                UART_Console_UartPutChar(HexToAscii(LO8(HI16(status)),1));
+                UART_Console_UartPutChar(HexToAscii(LO8(HI16(status)),0));
+            }
         }
         UART_Console_UartPutString("\r\nUser SFLASH write complete\r\n");
     }

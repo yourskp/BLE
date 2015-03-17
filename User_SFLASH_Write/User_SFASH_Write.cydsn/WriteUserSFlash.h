@@ -28,8 +28,9 @@
 
 #include <project.h>
 
-#define LOAD_FLASH				0x80000004
-#define WRITE_USER_SFLASH_ROW	0x80000018
+#define LOAD_FLASH				            0x80000004
+#define WRITE_USER_SFLASH_ROW	            0x80000018
+#define USER_SFLASH_WRITE_SUCCESSFUL        0xA0000000    
 	
 uint32 WriteUserSFlashRow(uint8 userrow_num, uint32 *write_value);   
 
