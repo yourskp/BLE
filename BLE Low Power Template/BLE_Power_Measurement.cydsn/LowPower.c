@@ -40,7 +40,7 @@
 *******************************************************************************/
 
 /********************************************************************************
-*	Description - Routines to configure PSoC 4 BLE systme in low power modes 
+*	Description - Routines to configure PSoC 4 BLE system in low power modes 
 ********************************************************************************/
 
 #include <Application.h>
@@ -59,7 +59,7 @@
 *  none
 *
 ********************************************************************************/
-void System_ManagePower()
+inline void System_ManagePower()
 {
     /* Variable declarations */
     CYBLE_BLESS_STATE_T blePower;

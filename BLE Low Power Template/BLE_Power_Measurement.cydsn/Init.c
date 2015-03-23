@@ -66,7 +66,7 @@ void InitializeSystem(void)
 {
     CyGlobalIntEnable;      /* Enable Global Interrupts*/
     
-    /* Internal low power oscillator is no longer required after Watch Crystal oscillaot is started */
+    /* Internal low power oscillator is no longer required after Watch Crystal oscillator is started */
     CySysClkIloStop();
     
     /* Set the divider for ECO, ECO will be used as source when IMO is switched off to save power */
@@ -89,10 +89,22 @@ void InitializeSystem(void)
     CySysPmDeepSleep();
     while(1);
 #endif /* End of #if DEEPSLEEP_ONLY */
+
+    /***************************************************************************
+    * If SLEEP_ONLY is enabled, then the device stays in sleep all the time  
+    * This is a good way to check the device sleep current at different operating 
+    * frequencies
+    ***************************************************************************/
+#if SLEEP_ONLY
+    CySysClkEcoStop();
+    CySysClkWriteImoFreq(SLEEP_OPERATING_FREQUENCY);
+    CySysPmSleep();
+    while(1);
+#endif /* End of #if SLEEP_ONLY */
     
 #if TX_RX_GPIO_ENABLE
     *(uint32*)(CYREG_RADIO_TX_RX_MUX_REGISTER)&= ~RADIO_TX_RX_MUX_MASK;   /* Clear Previous mux selection */
-    *(uint32*)(CYREG_RADIO_TX_RX_MUX_REGISTER) |=  BLESS_MUX_INPUT_MASK;  /* Set BLESS as the souce of the mux */
+    *(uint32*)(CYREG_RADIO_TX_RX_MUX_REGISTER) |=  BLESS_MUX_INPUT_MASK;  /* Set BLESS as the source of the mux */
     *(uint32*)(CYREG_BLE_BLESS_RF_CONFIG) |= RADIO_TX_RX_SEL; /* Select Tx enable & Rx enable signals from BLESS as input to mux */
 #endif /* End of #if TX_RX_GPIO_ENABLE */
     

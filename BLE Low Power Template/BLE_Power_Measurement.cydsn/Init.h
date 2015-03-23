@@ -40,7 +40,7 @@
 *******************************************************************************/
 
 /********************************************************************************
-* Description - Contians system initialization routines and startup code
+* Description - Contains system initialization routines and startup code
 ********************************************************************************/
 
 #if !defined(INIT_H)

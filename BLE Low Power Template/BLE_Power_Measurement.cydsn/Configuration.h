@@ -50,21 +50,27 @@
 /*****************************************************
 *                  Configuration flags
 *****************************************************/
-#define ENABLE_900_XTAL_STARTUP   1  /* Required to configure slave clock accuracy to 50ppm. Don't disable this */
-#define CON_PARAM_UPDATE          1  /* When enabled, updated BLE connection interval to 1 second */
-#define SEND_NOTIFICATIONS        0  /* Enables firmware to send HRM notifications when CCCD is enabled */
-#define NOTIF_INTERVAL_FOUR_SEC   0  /* Sends HRM notification once in 4 connection intervals. If connection interval 
-                                      * is 1 sec, then the firmware sends notifications every 4 seconds */
-#define DEBUG_ENABLE              1  /* Enables GPIO toggling on different power modes. Poor man's power profiler */
-#define TX_RX_GPIO_ENABLE         1  /* When enabled, depicts the state of radio Tx and Rx on port 3_2 and port 3_3  
-                                      * respectively */
-#define DEEPSLEEP_ONLY            0  /* Enable this option to measure the power consumed by PSoC 4 BLE device when in 
-                                      * DeepSleep mode */
+#define ENABLE_900_XTAL_STARTUP     1  /* Required to configure slave clock accuracy to 50ppm. Don't disable this */
+#define CON_PARAM_UPDATE            1  /* When enabled, updated BLE connection interval to 1 second */
+#define SEND_NOTIFICATIONS          0  /* Enables firmware to send HRM notifications when CCCD is enabled */
+#define NOTIF_INTERVAL_FOUR_SEC     0  /* Sends HRM notification once in 4 connection intervals. If connection interval 
+                                        * is 1 sec, then the firmware sends notifications every 4 seconds */
+#define DEBUG_ENABLE                1  /* Enables GPIO toggling on different power modes. Poor man's power profiler */
+#define TX_RX_GPIO_ENABLE           1  /* When enabled, depicts the state of radio Tx and Rx on port 3_2 and port 3_3  
+                                        * respectively */
+#define DEEPSLEEP_ONLY              0  /* Enable this option to measure the power consumed by PSoC 4 BLE device when in 
+                                        * DeepSleep mode */
+#define SLEEP_ONLY                  0  /* Enable this option to measure the power consumed by PSoC 4 BLE device when in 
+                                        * Sleep mode at operating frequency set by SLEEP_OPERATING_FREQUENCY (see below)*/ 
+    
+#if SLEEP_ONLY
+#define SLEEP_OPERATING_FREQUENCY   16 /* IMO frequency in MHz for which PSoC 4 BLE device sleep current is to be measured */     
+#endif    
 
 #if CON_PARAM_UPDATE
-    #define NOTIFICATION_OFFSET   10 /* When to start sending notification after CCCD is enabled */
+    #define NOTIFICATION_OFFSET     10 /* When to start sending notification after CCCD is enabled */
 #else
-    #define NOTIFICATION_OFFSET   1
+    #define NOTIFICATION_OFFSET     1
 #endif /* End of #if CON_PARAM_UPDATE */     
     
 #endif /* End of #if !defined(CONFIGURATION_H) */

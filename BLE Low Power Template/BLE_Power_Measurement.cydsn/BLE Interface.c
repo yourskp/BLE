@@ -109,7 +109,7 @@ CYBLE_API_RESULT_T BLE_Engine_Start(void)
 *  None
 *
 *******************************************************************************/
-void BLE_Run(void)
+inline void BLE_Run(void)
 {
     CyBle_ProcessEvents();
     

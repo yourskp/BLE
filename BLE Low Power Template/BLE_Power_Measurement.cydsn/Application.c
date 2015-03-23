@@ -66,11 +66,11 @@ POWER_MODE_T applicationPowerState = ACTIVE;
 * Return: 
 *  None
 *******************************************************************************/
-void Application_ManagePower(void)
+inline void Application_ManagePower(void)
 {
     switch(applicationPowerState)
     {
-        case ACTIVE: /* Dont need to do anything */
+        case ACTIVE: /* Don't need to do anything */
         break;
         
         case WAKEUP_SLEEP: 
@@ -83,7 +83,7 @@ void Application_ManagePower(void)
         
         case WAKEUP_DEEPSLEEP: 
         /***********************************************************************
-        * Add your code to wake up the application layer Componnets 
+        * Add your code to wake up the application layer Components 
         ************************************************************************/
             applicationPowerState = ACTIVE;
         break;

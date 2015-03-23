@@ -73,7 +73,7 @@
 ********************************************************************************
 * Summary:
 *        System entry point. This calls the BLE and other peripheral Component
-* APIs for achieving the desired system behavior
+* APIs for achieving the desired system behaviour
 *
 * Parameters:
 *  void
