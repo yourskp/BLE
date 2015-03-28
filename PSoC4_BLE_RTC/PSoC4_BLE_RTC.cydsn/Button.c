@@ -1,6 +1,6 @@
 /******************************************************************************
 * Project Name		: PSoC4 BLE RTC
-* File Name			: main.c
+* File Name			: Button.c
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
 * Software Used		: PSoC Creator 3.1 SP1
@@ -37,69 +37,100 @@
 *
 * Use of this Software may be limited by and subject to the applicable Cypress
 * software license agreement. 
+*******************************************************************************
+******************************************************************************
+*                           Description
+*******************************************************************************
+* This file contains the user button handling user functions and isrs.
+*
 *******************************************************************************/
 
-/******************************************************************************
-*                           THEORY OF OPERATION
-*******************************************************************************
-* This project demonstrates PSoC 4 BLE acting as a BLE time client that syncs 
-* time from an iOS device (iOS support time server out of the box) and runs an 
-* RTC in PSoC 4 BLE.
-*
-*******************************************************************************
-*                                 NOTES
-*******************************************************************************
-* This project will best work with iOS devices as iOS supports Current Time 
-* Service (CTS) out of the box. On othee BLE Central devices (Android, Cypress's
-* CySmart Host Emulation tool etc.), the RTC will start from time 0 after it 
-* discovers that CTS client is not supported by the peer device.
-*
-******************************************************************************
-*                         HARDWARE CONFIGURATION
-*******************************************************************************
-* 
-* 
-******************************************************************************/
-
-#include <BLE Connection.h>
 #include <Configuration.h>
-#include <device.h>
-#include <Init.h>
-#include <LowPower.h>
 #include <project.h>
-#include <RTC.h>
-#include <Stdio.h>
-#include <Stdlib.h>
+
+#if DISPLAY_ON_BUTTON_PRESS
+/***************************************
+*    Function declarations
+***************************************/ 
+CY_ISR_PROTO(Button_InterruptHandler);
+
+/***************************************
+*    Global variables
+***************************************/
+static uint8 buttonStatus = 0;
 
 /*******************************************************************************
-* Function Name: main
+* Function Name: Button_Start
 ********************************************************************************
 *
 * Summary:
-*  Main function.
+*  Starts the user button interrupt
 *
 * Parameters:  
 *  None
 *
 * Return: 
-*  Never
+*  None
 *
 *******************************************************************************/
-int main(void)
+void Button_Start(void)
 {
-    InitializeSystem();
-	
-    while(1)
-    {
-        /* Handles any pending BLE events and allows data communication over BLE. Must be called in system main loop */
-        BLE_Run(); 
-        
-        /* configure the system in lowest possible mode between BLE and RTC events */
-        HandleLowPowerMode();
-        
-        /* Update current RTC value on the UART console */
-        RTC_UI_Update();
-    }
+    Button_interrupt_StartEx(Button_InterruptHandler);
 }
+
+/*******************************************************************************
+* Function Name: Button_InterruptHandler
+********************************************************************************
+*
+* Summary:
+*  ISR for button press GPIO interrupt
+*
+* Parameters:  
+*  None
+*
+* Return: 
+*  None
+*
+*******************************************************************************/
+CY_ISR(Button_InterruptHandler)
+{
+    buttonStatus = 1;
+    
+    Button_interrupt_ClearPending();
+    
+    User_Button_ClearInterrupt();
+}
+
+/*******************************************************************************
+* Function Name: Button_IsPressed
+********************************************************************************
+*
+* Summary:
+*  ISR for button press GPIO interrupt
+*
+* Parameters:  
+*  None
+*
+* Return: 
+*  None
+*
+*******************************************************************************/
+uint8 Button_IsPressed(void)
+{
+    uint8 status;
+    uint8 apiResult = 0;
+    
+    status = CyEnterCriticalSection();
+    
+    apiResult = buttonStatus;
+    
+    buttonStatus = 0;
+    
+    CyExitCriticalSection(status);
+    
+    return apiResult;
+}
+
+#endif /* [] END OF #if DISPLAY_ON_BUTTON_PRESS */
 
 /* [] END OF FILE */

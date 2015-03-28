@@ -13,7 +13,7 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include <BLEConnection.h>
+#include <BLE Connection.h>
 #include <Configuration.h>
 #include <project.h>
 #include <RTC.h>
@@ -22,16 +22,20 @@
 /***************************************
 *    Function declarations
 ***************************************/
-void BLE_AppEventHandler(uint32 event, void* eventParam);
+void BLE_StackEventHandler(uint32 event, void* eventParam);
 void BLE_Interface_Init(void);
+static uint8 BLE_IsDisconnectionRequestPending(void);
+static void BLE_SendDisconnection(void);
 
 /***************************************
 *    Global variables
 ***************************************/
 uint8 BLE_status;
 uint8 encryptionStatus;
-volatile uint8 eventHandlerStatus;
-volatile uint8 rfActive = FALSE;
+
+#if DISCONNECT_BLE_AFTER_TIME_SYNC
+static uint8 sendDisconnection = 0;    
+#endif    
 
 /*******************************************************************************
 * Function Name: BLE_Interface_Start
@@ -53,7 +57,7 @@ CYBLE_API_RESULT_T BLE_Interface_Start(void)
     
     BLE_Interface_Init();
 
-    apiResult = CyBle_Start(BLE_AppEventHandler);
+    apiResult = CyBle_Start(BLE_StackEventHandler);
     
     RTC_Interrupt_StartEx(WDT_Handler);
     
@@ -226,11 +230,18 @@ uint8 BLE_Run(void)
 #endif        
     }
     
+#if DISCONNECT_BLE_AFTER_TIME_SYNC    
+    if(BLE_IsDisconnectionRequestPending())
+    {
+        BLE_SendDisconnection();
+    }
+#endif    
+    
     return BLE_status;
 }
 
 /*******************************************************************************
-* Function Name: BLE_AppEventHandler
+* Function Name: BLE_StackEventHandler
 ********************************************************************************
 *
 * Summary:
@@ -243,12 +254,12 @@ uint8 BLE_Run(void)
 *
 * Return: 
 *  None
-*d
 *******************************************************************************/
-void BLE_AppEventHandler(uint32 event, void* eventParam)
+void BLE_StackEventHandler(uint32 event, void* eventParam)
 {
+#if (RESTART_ADV_ON_DISCONNECTION)    
     CYBLE_API_RESULT_T apiResult;
-    CYBLE_GAP_AUTH_INFO_T *authInfo;
+#endif    
     CYBLE_GATTC_ERR_RSP_PARAM_T *errorResponse;
     
     switch (event)
@@ -270,6 +281,10 @@ void BLE_AppEventHandler(uint32 event, void* eventParam)
 #if (RTC_ENABLE)
                 RTC_Start();
 #endif /* End of #if (RTC_ENABLE) */
+
+#if DISCONNECT_BLE_AFTER_TIME_SYNC               
+                BLE_RequestDisconnection();
+#endif 
             }
 #endif /* End of #if (BLE_GATT_CLIENT_ENABLE) */    
 
@@ -277,21 +292,15 @@ void BLE_AppEventHandler(uint32 event, void* eventParam)
         /**********************************************************
         *                       GAP Events
         ***********************************************************/
-        
-        case CYBLE_EVT_GAP_PASSKEY_DISPLAY_REQUEST:
-#if(CONSOLE_LOG_ENABLED)            
-            printf("EVT_PASSKEY_DISPLAY_REQUEST %6.6ld \r\n", *(uint32 *)eventParam);
-#endif
-        break;
 
         case CYBLE_EVT_GAP_AUTH_COMPLETE:
-            authInfo = (CYBLE_GAP_AUTH_INFO_T *)eventParam;          
             /* we initiated the authentication with the iOS device and the authentication is now complete. Proceed
              * to characteristic value read after this */
             BLE_status = BLE_READ_TIME;
             break;    
             
         case CYBLE_EVT_GAP_DEVICE_DISCONNECTED:
+#if RESTART_ADV_ON_DISCONNECTION            
             BLE_Engine_Reinit(); /* Re-initialize application data structures */
             /* Put the device to discoverable mode so that remote can search it. */
             apiResult = CyBle_GappStartAdvertisement(CYBLE_ADVERTISING_FAST);
@@ -300,6 +309,7 @@ void BLE_AppEventHandler(uint32 event, void* eventParam)
             {
                 CYASSERT(0);    
             }
+#endif            
             break;    
         /**********************************************************
         *                       GATT Events
@@ -320,6 +330,10 @@ void BLE_AppEventHandler(uint32 event, void* eventParam)
 #if (RTC_ENABLE)/* If the time server is absent, let the RTC run in free run mode */
                 RTC_Start();
 #endif
+
+#if DISCONNECT_BLE_AFTER_TIME_SYNC               
+                BLE_RequestDisconnection();
+#endif 
             }
             else
             {
@@ -342,4 +356,61 @@ void BLE_AppEventHandler(uint32 event, void* eventParam)
 	}
 }
 
+#if DISCONNECT_BLE_AFTER_TIME_SYNC
+/*******************************************************************************
+* Function Name: BLE_RequestDisconnection
+********************************************************************************
+*
+* Summary:
+*   Request the BLE run routine to issue a disconnection request to the peer 
+*   device.
+*
+* Parameters:  
+*  None
+*
+* Return: 
+*  None
+*******************************************************************************/
+void BLE_RequestDisconnection(void)
+{
+    sendDisconnection = 1;    
+}
+
+/*******************************************************************************
+* Function Name: BLE_SendDisconnection
+********************************************************************************
+*
+* Summary:
+*   Initiates a BLE disconnection event to the peer device.
+*
+* Parameters:  
+*  None
+*
+* Return: 
+*  None
+*******************************************************************************/
+static void BLE_SendDisconnection(void)
+{
+    CyBle_GapDisconnect(cyBle_connHandle.bdHandle);
+    sendDisconnection = 0;    
+}
+
+/*******************************************************************************
+* Function Name: BLE_IsDisconnectionRequestPending
+********************************************************************************
+*
+* Summary:
+*   Checks if disconnection request from other blocks are pending or not.
+*
+* Parameters:  
+*  None
+*
+* Return: 
+*  1 - request is penidng, 0 - request not pending.
+*******************************************************************************/
+static uint8 BLE_IsDisconnectionRequestPending(void)
+{
+    return sendDisconnection;    
+}
+#endif    
 /* [] END OF FILE */

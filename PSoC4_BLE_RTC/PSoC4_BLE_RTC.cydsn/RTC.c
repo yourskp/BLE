@@ -13,7 +13,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include <BLEConnection.h>
+#include <BLE Connection.h>
+#include <Button.h>
 #include <Configuration.h>
 #include <project.h>
 #include <RTC.h>
@@ -132,6 +133,10 @@ void CtsCallBack(uint32 event, void* eventParam)
                 CyExitCriticalSection(intStatus);
                 
                 RTC_Start(); /* Update the RTC component with time synced from the BLE time server */
+                
+#if DISCONNECT_BLE_AFTER_TIME_SYNC               
+                BLE_RequestDisconnection();
+#endif    
             }
             else if(timeAttribute->charIndex == CYBLE_CTS_LOCAL_TIME_INFO)
             {
@@ -351,12 +356,18 @@ void RTC_UI_Update(void)
     if(RTC_TickExpired() == 1) /* one second interrupt expired */
     {
 #if(CONSOLE_LOG_ENABLED)
+#if DISPLAY_ON_BUTTON_PRESS    
+        if(Button_IsPressed())
+#endif /* End of DISCONNECT_BLE_AFTER_TIME_SYNC */       
+        {
         printf("%s ", dayOfTheWeek[currentTime.dayOfWeek-1]);
         printf("%d\\%d\\%d\\ %d:%d:%d\r\n",
                 ((uint16)(currentTime.yearHigh))<< 8 | currentTime.yearLow,
                 currentTime.month, currentTime.day, currentTime.hours, currentTime.minutes,
                 currentTime.seconds);
+        
 #endif /* End of CONSOLE_LOG_ENABLED */
+        }
 	}
 }
 

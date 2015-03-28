@@ -13,7 +13,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include <BLEConnection.h>
+#include <BLE Connection.h>
+#include <Button.h>
 #include <Configuration.h>
 #include <Project.h>
 
@@ -40,5 +41,10 @@ void InitializeSystem(void)
 #if (CONSOLE_LOG_ENABLED)
     Debug_Console_Start();  /* Consolle log interface */
 #endif /* End of #if (CONSOLE_LOG_ENABLED) */
+
+#if (DISPLAY_ON_BUTTON_PRESS)
+    Button_Start();
+#endif
+
 }
 /* [] END OF FILE */

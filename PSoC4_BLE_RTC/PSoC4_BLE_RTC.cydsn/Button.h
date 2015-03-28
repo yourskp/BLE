@@ -1,6 +1,6 @@
 /******************************************************************************
 * Project Name		: PSoC4 BLE RTC
-* File Name			: main.c
+* File Name			: Button.c
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
 * Software Used		: PSoC Creator 3.1 SP1
@@ -37,69 +37,25 @@
 *
 * Use of this Software may be limited by and subject to the applicable Cypress
 * software license agreement. 
-*******************************************************************************/
-
-/******************************************************************************
-*                           THEORY OF OPERATION
 *******************************************************************************
-* This project demonstrates PSoC 4 BLE acting as a BLE time client that syncs 
-* time from an iOS device (iOS support time server out of the box) and runs an 
-* RTC in PSoC 4 BLE.
-*
-*******************************************************************************
-*                                 NOTES
-*******************************************************************************
-* This project will best work with iOS devices as iOS supports Current Time 
-* Service (CTS) out of the box. On othee BLE Central devices (Android, Cypress's
-* CySmart Host Emulation tool etc.), the RTC will start from time 0 after it 
-* discovers that CTS client is not supported by the peer device.
-*
 ******************************************************************************
-*                         HARDWARE CONFIGURATION
+*                           Description
 *******************************************************************************
-* 
-* 
-******************************************************************************/
-
-#include <BLE Connection.h>
-#include <Configuration.h>
-#include <device.h>
-#include <Init.h>
-#include <LowPower.h>
-#include <project.h>
-#include <RTC.h>
-#include <Stdio.h>
-#include <Stdlib.h>
-
-/*******************************************************************************
-* Function Name: main
-********************************************************************************
-*
-* Summary:
-*  Main function.
-*
-* Parameters:  
-*  None
-*
-* Return: 
-*  Never
+* This file contains the user button function headers and constants
 *
 *******************************************************************************/
-int main(void)
-{
-    InitializeSystem();
-	
-    while(1)
-    {
-        /* Handles any pending BLE events and allows data communication over BLE. Must be called in system main loop */
-        BLE_Run(); 
-        
-        /* configure the system in lowest possible mode between BLE and RTC events */
-        HandleLowPowerMode();
-        
-        /* Update current RTC value on the UART console */
-        RTC_UI_Update();
-    }
-}
+
+#if !defined(BUTTON_H)
+#define BUTTON_H
+    
+#include <cytypes.h>
+    
+/***************************************
+*    Function declarations
+***************************************/    
+void Button_Start(void);
+uint8 Button_IsPressed(void);
+    
+#endif    
 
 /* [] END OF FILE */

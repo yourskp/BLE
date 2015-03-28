@@ -17,13 +17,15 @@
 #if !defined(CONFIGURATION_H)
 #define CONFIGURATION_H
     
-/* BLE interface feature flag */
-    
-/* BLE GATT Client feature flags */    
+/* Project configuration flags */    
 #define BLE_GATT_CLIENT_ENABLE                      (1u)
 #define RTC_ENABLE                                  (1u)
-    
-#define CONSOLE_LOG_ENABLED                         (1u)       
+#define DISCONNECT_BLE_AFTER_TIME_SYNC              (1u)  
+#define RESTART_ADV_ON_DISCONNECTION                (0u)  
+#define CONSOLE_LOG_ENABLED                         (1u)
+#if CONSOLE_LOG_ENABLED    
+#define DISPLAY_ON_BUTTON_PRESS                     (1u)    
+#endif    
     
 #define TRUE 1
 #define FALSE 0
