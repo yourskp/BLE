@@ -229,6 +229,7 @@ pip-log.txt
 **/Generated_Source/PSoC4/*.ICF
 **/Generated_Source/PSoC4/*.ld
 **/Generated_Source/PSoC4/*.scat
+**/Generated_Source/PSoC4/*.c
 *.cycdx
 *.cyfit
 *.svd
