@@ -3,7 +3,7 @@
 * File Name			: BLE Interface.c
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
-* Software Used		: PSoC Creator 3.1 SP1
+* Software Used		: ADD PSOC CREATOR VERSION USED FOR YOUR PROJECT
 * Compiler    		: ARM GCC 4.8.4
 * Related Hardware	: CY8CKIT-042-BLE Bluetooth Low Energy Pioneer Kit 
 * Owner				: ADD YOUR EMAIL ID HERE
@@ -105,7 +105,7 @@ CYBLE_API_RESULT_T BLE_Engine_Start(void)
 *  None
 *
 *******************************************************************************/
-inline void BLE_Run(void)
+void BLE_Run(void)
 {
     CyBle_ProcessEvents();
     
