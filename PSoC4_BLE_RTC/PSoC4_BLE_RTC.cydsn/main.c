@@ -1,5 +1,5 @@
 /******************************************************************************
-* Project Name		: PSoC4 BLE RTC
+* Project Name		: PSoC4_BLE_RTC
 * File Name			: main.c
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
@@ -54,22 +54,21 @@
 * CySmart Host Emulation tool etc.), the RTC will start from time 0 after it 
 * discovers that CTS client is not supported by the peer device.
 *
-******************************************************************************
-*                         HARDWARE CONFIGURATION
-*******************************************************************************
-* 
+* Device "Debug Select" option in project's .cydwr file's "system" tab is set to 
+* GPIO to reduce power consumption of the device. If you like to debug this 
+* example project, change the "Debug Select" option to SWD.
+*
+* System heap memory size is set to 1K in .cydwr -> system tab. This is required
+* for using printf function in this example. Set the heap size to 0 (to reduce 
+* SRAM consumption of the project) if you have disabled the console log
 * 
 ******************************************************************************/
 
 #include <BLE Connection.h>
-#include <Configuration.h>
-#include <device.h>
 #include <Init.h>
 #include <LowPower.h>
 #include <project.h>
 #include <RTC.h>
-#include <Stdio.h>
-#include <Stdlib.h>
 
 /*******************************************************************************
 * Function Name: main
@@ -94,8 +93,8 @@ int main(void)
         /* Handles any pending BLE events and allows data communication over BLE. Must be called in system main loop */
         BLE_Run(); 
         
-        /* configure the system in lowest possible mode between BLE and RTC events */
-        HandleLowPowerMode();
+        /* Configure the system in lowest possible mode between BLE and RTC events */
+        System_ManagePower();
         
         /* Update current RTC value on the UART console */
         RTC_UI_Update();

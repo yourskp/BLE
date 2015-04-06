@@ -1,5 +1,5 @@
 /******************************************************************************
-* Project Name		: PSoC4 BLE RTC
+* Project Name		: PSoC4_BLE_RTC
 * File Name			: Button.c
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
@@ -41,7 +41,7 @@
 ******************************************************************************
 *                           Description
 *******************************************************************************
-* This file contains the user button handling user functions and isrs.
+* This file contains the user button handling functions and isrs.
 *
 *******************************************************************************/
 
@@ -106,7 +106,8 @@ CY_ISR(Button_InterruptHandler)
 ********************************************************************************
 *
 * Summary:
-*  ISR for button press GPIO interrupt
+*  Let the application know the state of the user button. It's a clear on read
+*  API
 *
 * Parameters:  
 *  None
@@ -131,6 +132,6 @@ uint8 Button_IsPressed(void)
     return apiResult;
 }
 
-#endif /* [] END OF #if DISPLAY_ON_BUTTON_PRESS */
+#endif /* End of #if DISPLAY_ON_BUTTON_PRESS */
 
 /* [] END OF FILE */

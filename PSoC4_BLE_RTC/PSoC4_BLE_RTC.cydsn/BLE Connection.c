@@ -1,16 +1,49 @@
-/*******************************************************************************
-* File Name: BLE Connection.c
+/******************************************************************************
+* Project Name		: PSoC4_BLE_RTC
+* File Name			: BLE Connection.c
+* Version 			: 1.0
+* Device Used		: CY8C4247LQI-BL483
+* Software Used		: PSoC Creator 3.1 SP1
+* Compiler    		: ARM GCC 4.8.4
+* Related Hardware	: CY8CKIT-042-BLE Bluetooth Low Energy Pioneer Kit 
+* Owner				: kris@cypress.com
 *
-* Version: 1.0
+********************************************************************************
+* Copyright (2015), Cypress Semiconductor Corporation. All Rights Reserved.
+********************************************************************************
+* This software is owned by Cypress Semiconductor Corporation (Cypress)
+* and is protected by and subject to worldwide patent protection (United
+* States and foreign), United States copyright laws and international treaty
+* provisions. Cypress hereby grants to licensee a personal, non-exclusive,
+* non-transferable license to copy, use, modify, create derivative works of,
+* and compile the Cypress Source Code and derivative works for the sole
+* purpose of creating custom software in support of licensee product to be
+* used only in conjunction with a Cypress integrated circuit as specified in
+* the applicable agreement. Any reproduction, modification, translation,
+* compilation, or representation of this software except as specified above 
+* is prohibited without the express written permission of Cypress.
 *
-* Description: This file contains routines that handle all the BLE interface  
-*              connection establishment procedures and event handlers.
+* Disclaimer: CYPRESS MAKES NO WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, WITH 
+* REGARD TO THIS MATERIAL, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED 
+* WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
+* Cypress reserves the right to make changes without further notice to the 
+* materials described herein. Cypress does not assume any liability arising out 
+* of the application or use of any product or circuit described herein. Cypress 
+* does not authorize its products for use as critical components in life-support 
+* systems where a malfunction or failure may reasonably be expected to result in 
+* significant injury to the user. The inclusion of Cypress' product in a life-
+* support systems application implies that the manufacturer assumes all risk of 
+* such use and in doing so indemnifies Cypress against all charges. 
 *
+* Use of this Software may be limited by and subject to the applicable Cypress
+* software license agreement. 
 *******************************************************************************
-* Copyright 2015, Cypress Semiconductor Corporation.  All rights reserved.
-* You may use this file only in accordance with the license, terms, conditions,
-* disclaimers, and limitations in the end user license agreement accompanying
-* the software package with which this file was provided.
+******************************************************************************
+*                           Description
+*******************************************************************************
+* This file contains routines that handle all the BLE interface connection 
+* establishment procedures and event handlers.
+*
 *******************************************************************************/
 
 #include <BLE Connection.h>
@@ -30,8 +63,7 @@ static void BLE_SendDisconnection(void);
 /***************************************
 *    Global variables
 ***************************************/
-uint8 BLE_status;
-uint8 encryptionStatus;
+uint8 bleStatus;
 
 #if DISCONNECT_BLE_AFTER_TIME_SYNC
 static uint8 sendDisconnection = 0;    
@@ -59,8 +91,6 @@ CYBLE_API_RESULT_T BLE_Interface_Start(void)
 
     apiResult = CyBle_Start(BLE_StackEventHandler);
     
-    RTC_Interrupt_StartEx(WDT_Handler);
-    
     return apiResult;
 }
 
@@ -80,8 +110,7 @@ CYBLE_API_RESULT_T BLE_Interface_Start(void)
 *******************************************************************************/
 void BLE_Interface_Init(void)
 {
-    BLE_status = BLE_DISCONNECTED;
-    encryptionStatus = BLE_LINK_ENCRYPTION_DISABLED;
+    bleStatus = BLE_DISCONNECTED;
 }
 
 /*******************************************************************************
@@ -172,19 +201,21 @@ uint8 BLE_Run(void)
 #if (BLE_GATT_CLIENT_ENABLE)
     CYBLE_API_RESULT_T status;
     
-    switch(BLE_status)
+    switch(bleStatus)
     {
         case BLE_CONNECTED:
             status = StartTimeServiceDiscovery();
             if(CYBLE_ERROR_OK == status)
             {            
-                BLE_status = BLE_DISCOVEER_GATT_SERVICES;
-
+                bleStatus = BLE_DISCOVEER_GATT_SERVICES;
             }
             else
             {
-                BLE_status = BLE_INVALID_OPERATION;   
+                bleStatus = BLE_INVALID_OPERATION;   
             }
+#if(CONSOLE_LOG_ENABLED)
+            printf("BLE connection established \r\n\n");
+#endif /* End of #if(CONSOLE_LOG_ENABLED) */            
         break;
             
         case BLE_READ_TIME:
@@ -193,20 +224,18 @@ uint8 BLE_Run(void)
                 status = SyncTimeFromBleTimeServer();
                 if(CYBLE_ERROR_OK == status)
                 {
-                    BLE_status = BLE_IDLE;
-
+                    bleStatus = BLE_IDLE;
                 }
                 else
                 {
-                    BLE_status = BLE_INVALID_OPERATION;
-
+                    bleStatus = BLE_INVALID_OPERATION;
                 }
             }
         break;
             
         case BLE_INITIATE_AUTHENTICATION:
             CyBle_GapAuthReq(cyBle_connHandle.bdHandle, &cyBle_authInfo);
-            BLE_status = BLE_AUTHENTICATION_IN_PROGRESS;
+            bleStatus = BLE_AUTHENTICATION_IN_PROGRESS;
         break;    
         
         default:
@@ -225,9 +254,6 @@ uint8 BLE_Run(void)
     )
     {
         status = CyBle_StoreBondingData(0u);
-#if(CONSOLE_LOG_ENABLED)        
-        printf("Store bonding data, status: %x \r\n", status);
-#endif        
     }
     
 #if DISCONNECT_BLE_AFTER_TIME_SYNC    
@@ -237,7 +263,7 @@ uint8 BLE_Run(void)
     }
 #endif    
     
-    return BLE_status;
+    return bleStatus;
 }
 
 /*******************************************************************************
@@ -259,7 +285,7 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
 {
 #if (RESTART_ADV_ON_DISCONNECTION)    
     CYBLE_API_RESULT_T apiResult;
-#endif    
+#endif /* End of #if (RESTART_ADV_ON_DISCONNECTION) */
     CYBLE_GATTC_ERR_RSP_PARAM_T *errorResponse;
     
     switch (event)
@@ -269,22 +295,26 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
         ***********************************************************/
 		case CYBLE_EVT_STACK_ON: /* This event is received when component is Started */
             /* Enter in to discoverable mode so that remote can search it. */
-            (void) CyBle_GappStartAdvertisement(CYBLE_ADVERTISING_FAST);   
+            (void) CyBle_GappStartAdvertisement(CYBLE_ADVERTISING_FAST);  
+            
+#if(CONSOLE_LOG_ENABLED)
+            printf("Advertising... \r\n\n");
+#endif /* End of #if(CONSOLE_LOG_ENABLED) */             
             break;
             
 		case CYBLE_EVT_TIMEOUT:            
 #if (BLE_GATT_CLIENT_ENABLE)
-            if(*(uint8 *)eventParam == CYBLE_GATT_RSP_TO && BLE_status == BLE_DISCOVEER_GATT_SERVICES)
+            if(*(uint8 *)eventParam == CYBLE_GATT_RSP_TO && bleStatus == BLE_DISCOVEER_GATT_SERVICES)
             {
                 /* The peer device didn't respond to service discovery, enable RTC in free run mode if configured */
-                BLE_status = BLE_TIME_SERVER_ABSENT;
+                bleStatus = BLE_TIME_SERVER_ABSENT;
 #if (RTC_ENABLE)
                 RTC_Start();
 #endif /* End of #if (RTC_ENABLE) */
 
 #if DISCONNECT_BLE_AFTER_TIME_SYNC               
                 BLE_RequestDisconnection();
-#endif 
+#endif /* End of #if DISCONNECT_BLE_AFTER_TIME_SYNC */
             }
 #endif /* End of #if (BLE_GATT_CLIENT_ENABLE) */    
 
@@ -296,7 +326,7 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
         case CYBLE_EVT_GAP_AUTH_COMPLETE:
             /* we initiated the authentication with the iOS device and the authentication is now complete. Proceed
              * to characteristic value read after this */
-            BLE_status = BLE_READ_TIME;
+            bleStatus = BLE_READ_TIME;
             break;    
             
         case CYBLE_EVT_GAP_DEVICE_DISCONNECTED:
@@ -309,35 +339,38 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
             {
                 CYASSERT(0);    
             }
-#endif            
+#endif  /* End of #if RESTART_ADV_ON_DISCONNECTION */
             break;    
         /**********************************************************
         *                       GATT Events
         ***********************************************************/
         case CYBLE_EVT_GATT_CONNECT_IND:
-            BLE_status = BLE_CONNECTED;
+            bleStatus = BLE_CONNECTED;
             break;
             
         case CYBLE_EVT_GATT_DISCONNECT_IND:
-            BLE_status = BLE_DISCONNECTED;
+            bleStatus = BLE_DISCONNECTED;
+#if(CONSOLE_LOG_ENABLED)
+            printf("Disconnected!\r\n\n");
+#endif    
             break;
             
         case CYBLE_EVT_GATTC_DISCOVERY_COMPLETE:
             if(cyBle_ctsc.currTimeCharacteristics[CYBLE_CTS_CURRENT_TIME].valueHandle == 0x0000)
             {
-                BLE_status = BLE_TIME_SERVER_ABSENT;
+                bleStatus = BLE_TIME_SERVER_ABSENT;
                 
 #if (RTC_ENABLE)/* If the time server is absent, let the RTC run in free run mode */
                 RTC_Start();
-#endif
+#endif /* End of #if (RTC_ENABLE) */
 
 #if DISCONNECT_BLE_AFTER_TIME_SYNC               
                 BLE_RequestDisconnection();
-#endif 
+#endif /* End of #if DISCONNECT_BLE_AFTER_TIME_SYNC */
             }
             else
             {
-                BLE_status = BLE_READ_TIME;
+                bleStatus = BLE_READ_TIME;
             }
             break;
             
@@ -347,7 +380,7 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
             /* characteristic read requires an authenticated link */
             if(errorResponse -> errorCode == CYBLE_GATT_ERR_INSUFFICIENT_AUTHENTICATION)
             {
-                BLE_status = BLE_INITIATE_AUTHENTICATION;
+                bleStatus = BLE_INITIATE_AUTHENTICATION;
             }
             break;   
             
@@ -374,6 +407,10 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
 void BLE_RequestDisconnection(void)
 {
     sendDisconnection = 1;    
+    
+#if(CONSOLE_LOG_ENABLED)
+    printf("Automatic disconnection initiated (RTC will continue to run even after BLE disconnection) \r\n\n");
+#endif /* End of #if(CONSOLE_LOG_ENABLED) */
 }
 
 /*******************************************************************************
@@ -412,5 +449,6 @@ static uint8 BLE_IsDisconnectionRequestPending(void)
 {
     return sendDisconnection;    
 }
-#endif    
+#endif /* End of #if DISCONNECT_BLE_AFTER_TIME_SYNC */
+
 /* [] END OF FILE */

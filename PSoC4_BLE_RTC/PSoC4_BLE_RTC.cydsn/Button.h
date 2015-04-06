@@ -1,6 +1,6 @@
 /******************************************************************************
-* Project Name		: PSoC4 BLE RTC
-* File Name			: Button.c
+* Project Name		: PSoC4_BLE_RTC
+* File Name			: Button.h
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
 * Software Used		: PSoC Creator 3.1 SP1
