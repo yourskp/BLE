@@ -6,7 +6,7 @@
 * Author - kris@cypress.com
 * 
 * Description:
-*  main code for iBeaocn application.
+*  main code for Beaocn application.
 *
 ********************************************************************************
 * Copyright 2010-2015, Cypress Semiconductor Corporation.  All rights reserved.
