@@ -19,6 +19,7 @@
 *    Firmware Configuration Flags
 ***************************************/
 #define CAPSENSE_ENABLED            (1u)
+#define CAPSENSE_SLIDER             (0u)  
 #define LOGGING_ENABLED             (1u)
 
 /***************************************

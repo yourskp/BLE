@@ -26,7 +26,7 @@
     
 #define MIDI_NOTE_VELOCITY_OFF                      (0x00)
 #define MIDI_NOTE_VELOCITY_ON                       (0x3F)  
-#define MIDI_NOTE_OFFSET                            (50u)    
+#define MIDI_NOTE_OFFSET                            (60u)    
     
 #define LOW                                         (0u)
 #define HIGH                                        (1u)    

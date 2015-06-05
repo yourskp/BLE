@@ -20,6 +20,8 @@
 ***************************************/
 UI_STATE uiState = UI_IDLE_STATE;
 uint16 currentSliderPosition = NO_FINGER_ON_SLIDER;
+uint16 currentButtonPosition = NO_FINGER_ON_BUTTON;
+uint16 previousButtonPosition = NO_FINGER_ON_BUTTON;
 uint16 previousSliderPosition = NO_FINGER_ON_SLIDER;
 
 /*******************************************************************************
@@ -69,7 +71,11 @@ uint16 UI_Run(void)
         switch(uiState)
         {
             case UI_IDLE_STATE:
+#if CAPSENSE_SLIDER                
                 CapSense_ScanWidget(CapSense_LINEARSLIDER0__LS); /* Initiate the sensor scan */
+#else
+                CapSense_ScanEnabledWidgets(); /* Initiate the sensor scan */
+#endif    
                 uiState = UI_SCANNING_STATE;
             break;
             
@@ -77,6 +83,8 @@ uint16 UI_Run(void)
                 if(CapSense_IsBusy() == 0)
                 {
                     CapSense_UpdateEnabledBaselines(); /* Keep the baseline updated with current performance numbers */
+                    
+#if CAPSENSE_SLIDER                     
                     currentSliderPosition = CapSense_GetCentroidPos(CapSense_LINEARSLIDER0__LS);
                     
                     if(currentSliderPosition != NO_FINGER_ON_SLIDER)
@@ -85,15 +93,51 @@ uint16 UI_Run(void)
                     }
                     
                     uiState = UI_RESULT_STATE;  
+#else
+                    if(CapSense_CheckIsWidgetActive(CapSense_NOTE1__BTN))
+                    {
+                        currentButtonPosition = NOTE1_VALUE;    
+                    }
+                    else if(CapSense_CheckIsWidgetActive(CapSense_NOTE2__BTN))
+                    {
+                        currentButtonPosition = NOTE2_VALUE;    
+                    }
+                    else if(CapSense_CheckIsWidgetActive(CapSense_NOTE3__BTN))
+                    {
+                        currentButtonPosition = NOTE3_VALUE;    
+                    }
+                    else if(CapSense_CheckIsWidgetActive(CapSense_NOTE4__BTN))
+                    {
+                        currentButtonPosition = NOTE4_VALUE;    
+                    }
+                    else if(CapSense_CheckIsWidgetActive(CapSense_NOTE5__BTN))
+                    {
+                        currentButtonPosition = NOTE5_VALUE;    
+                    }
+                    else
+                    {
+                        currentButtonPosition = NO_FINGER_ON_SLIDER; 
+                    }
+                    
+                    uiState = UI_RESULT_STATE;
+#endif    
                 }
             break;
             
             case UI_RESULT_STATE:
+#if CAPSENSE_SLIDER                           
                 if(currentSliderPosition != previousSliderPosition)
                 {
                     uiChangeStatus = currentSliderPosition;
                     previousSliderPosition = currentSliderPosition;
                 }
+#else
+                if(currentButtonPosition != previousButtonPosition)
+                {
+                    uiChangeStatus = currentButtonPosition;
+                    previousButtonPosition = currentButtonPosition;
+                }
+#endif    
                 uiState = UI_IDLE_STATE;  
             break;
                 
