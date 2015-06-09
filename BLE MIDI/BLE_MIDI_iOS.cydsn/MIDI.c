@@ -68,7 +68,7 @@ void MIDIEventHandler(uint32 event, void *eventParam)
         break;
             
         case CYBLE_EVT_GATTS_WRITE_CMD_REQ:
-           ServiceMidiOutData();
+           ServiceMidiOutData(eventParam);
         break;
     }
 }
@@ -129,15 +129,27 @@ uint8 IsMidiEnabled(void)
 *  a MIDI IO Characteristic write.
 *
 * Parameters:
-*  void
+*  eventParam -  MIDI note write event data
 *
 * Return:
 *  None
 *
 *******************************************************************************/
-void ServiceMidiOutData(void)
+void ServiceMidiOutData(void *eventParam)
 {
+    CYBLE_GATTS_WRITE_REQ_PARAM_T *midiOutEvent = (CYBLE_GATTS_WRITE_REQ_PARAM_T *) eventParam;
+    CYBLE_GATT_HANDLE_VALUE_PAIR_T midiOutData;
+    uint8 midiDataLength;
     
+    midiOutData = midiOutEvent->handleValPair;
+    
+    /* This write event is for the MIDI IO characteristic */
+    if(CYBLE_MIDI_SERVICE_MIDI_IO_CHARATERISTIC_CHAR_HANDLE == midiOutData.attrHandle)
+    {
+        midiDataLength = midiOutData.value.len;
+        
+        if(midiDataLength == )
+    }
 }
 
 /*******************************************************************************

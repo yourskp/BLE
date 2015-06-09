@@ -63,7 +63,7 @@ void Midi_Start(void);
 void MIDIEventHandler(uint32 event, void* eventParam);
 void Midi_Run(uint16 uiChangeStatus);
 uint8 IsMidiEnabled(void);
-void ServiceMidiOutData(void);
+void ServiceMidiOutData(void *eventParam);
 
 static void Midi_GenerateMessages(uint16 uiChangeStatus);
 static uint8 Midi_GetTimeStamp(uint8 byteNumber);
