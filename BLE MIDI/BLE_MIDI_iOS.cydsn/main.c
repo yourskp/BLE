@@ -67,9 +67,11 @@ int main()
 
         BLE_Run();
         
-        uiChangeStatus = UI_Run();
+        uiChangeStatus = UIInput_Run();
         
         Midi_Run(uiChangeStatus);
+        
+        UIOutput_Run();
         
         if(cyBle_pendingFlashWrite != 0u)
         {

@@ -15,16 +15,6 @@
 #define UI_H
     
 #include <MIDI.h>
-    
-/***************************************
-*       UI Enums
-***************************************/
-typedef enum
-{
-    UI_IDLE_STATE,
-    UI_SCANNING_STATE,
-    UI_RESULT_STATE
-} UI_STATE;
 
 /***************************************
 *       UI Constants
@@ -43,13 +33,46 @@ typedef enum
 #define NOTE4_VALUE                                 (3u)
 #define NOTE5_VALUE                                 (4u)
 
+#define UI_OUTPUT_MAIL_SIZE                         (2u)
+#define UI_OUTPUT_MAIL_STATUS_VALID                 (1u)
+#define UI_OUTPUT_MAIL_STATUS_INVALID               (0u)
+#define UI_MAIL_UPDATE_SUCCESSFUL                   (1u)
+#define UI_MAIL_UPDATE_OVERFLOW_FAILURE             (0u)
+
 #define IsUIEnabled()                               IsMidiEnabled()
+    
+/***************************************
+*       UI Structs
+***************************************/
+typedef struct
+{
+    uint8 validStatus;
+    uint8 LedDriveLevel;
+} UI_OUTPUT_MAIL_T;
+
+typedef struct
+{
+    uint8 outputMailIndex;
+    UI_OUTPUT_MAIL_T outputMail[UI_OUTPUT_MAIL_SIZE];    
+} UI_OUTPUT_MAILBOX_T;
+
+/***************************************
+*       UI Enums
+***************************************/
+typedef enum
+{
+    UI_IDLE_STATE,
+    UI_SCANNING_STATE,
+    UI_RESULT_STATE
+} UI_STATE;    
 
 /***************************************
 *       Function Prototypes
 ***************************************/
 void UI_Start(void);
-uint16 UI_Run(void);
+uint16 UIInput_Run(void);
+void UIOutput_Run(void);
+uint8 UIOutput_UpdateMailbox (uint8 driveLevel);
     
 #endif
 

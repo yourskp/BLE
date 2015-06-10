@@ -23,6 +23,7 @@ uint16 currentSliderPosition = NO_FINGER_ON_SLIDER;
 uint16 currentButtonPosition = NO_FINGER_ON_BUTTON;
 uint16 previousButtonPosition = NO_FINGER_ON_BUTTON;
 uint16 previousSliderPosition = NO_FINGER_ON_SLIDER;
+UI_OUTPUT_MAILBOX_T uiOutputMailbox;
 
 /*******************************************************************************
 * Function Name: UI_Start
@@ -39,6 +40,8 @@ uint16 previousSliderPosition = NO_FINGER_ON_SLIDER;
 *******************************************************************************/
 void UI_Start(void)
 {
+    uint8 loopIndex;
+    
 #if CAPSENSE_ENABLED
 	/*Initialize CapSense component and initialize baselines*/
 	CapSense_Start();
@@ -46,22 +49,26 @@ void UI_Start(void)
     
     uiState = UI_IDLE_STATE;
 #endif
+    
+    uiOutputMailbox.outputMailIndex = 0;
+    
+    PWM_Start();
 }
 
 /*******************************************************************************
-* Function Name: UI_Run
+* Function Name: UIInput_Run
 ********************************************************************************
 * Summary:
-*        Runs the user interface engine for the MIDI interface
+*        Runs the user interface input engine for the MIDI interface
 *
 * Parameters:
 *  void
 *
 * Return:
-*  void
+*  UI input status change (if any)
 *
 *******************************************************************************/
-uint16 UI_Run(void)
+uint16 UIInput_Run(void)
 {
     uint16 uiChangeStatus = NO_UI_STATE_CHANGE;
     
@@ -148,6 +155,56 @@ uint16 UI_Run(void)
     }
     
     return uiChangeStatus;
+}
+
+/*******************************************************************************
+* Function Name: UIOutput_UpdateMailbox
+********************************************************************************
+* Summary:
+*        Updates the UI LED output mailbox with a valid drive level data
+*
+* Parameters:
+*  LED drive level
+*
+* Return:
+*  Successful or not
+*
+*******************************************************************************/
+uint8 UIOutput_UpdateMailbox (uint8 driveLevel)
+{
+    if(uiOutputMailbox.outputMailIndex != UI_OUTPUT_MAIL_SIZE)
+    {
+        uiOutputMailbox.outputMail[uiOutputMailbox.outputMailIndex].LedDriveLevel = driveLevel;
+        uiOutputMailbox.outputMailIndex++;
+    }
+    else
+    {
+        return UI_MAIL_UPDATE_OVERFLOW_FAILURE;
+    }
+    
+    return UI_MAIL_UPDATE_SUCCESSFUL;
+}
+
+/*******************************************************************************
+* Function Name: UIOutput_Run
+********************************************************************************
+* Summary:
+*        Runs the user interface output engine for the MIDI interface
+*
+* Parameters:
+*  void
+*
+* Return:
+*  void
+*
+*******************************************************************************/
+void UIOutput_Run(void)
+{
+    while(uiOutputMailbox.outputMailIndex != 0)
+    {
+        uiOutputMailbox.outputMailIndex--;
+        PWM_WriteCompare(uiOutputMailbox.outputMail[uiOutputMailbox.outputMailIndex].LedDriveLevel);
+    }
 }
 
 /* [] END OF FILE */

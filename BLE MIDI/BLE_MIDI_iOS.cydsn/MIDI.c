@@ -148,7 +148,19 @@ void ServiceMidiOutData(void *eventParam)
     {
         midiDataLength = midiOutData.value.len;
         
-        if(midiDataLength == )
+        if(midiDataLength == MIDI_FULL_EVENT_SIZE)
+        {
+            switch(midiOutData.value.val[MIDI_STATUS_INDEX])
+            {
+                case MIDI_NOTE_ON_CHANNEL_0:
+                    UIOutput_UpdateMailbox(midiOutData.value.val[MIDI_NOTE_VELOCITY_INDEX]);
+                break;
+                
+                case MIDI_NOTE_OFF_CHANNEL_0:
+                    UIOutput_UpdateMailbox(0);
+                break;
+            }
+        }
     }
 }
 

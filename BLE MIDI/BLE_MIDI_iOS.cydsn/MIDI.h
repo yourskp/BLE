@@ -23,10 +23,15 @@
 #define MAX_MIDI_PACKET_LENGTH                      (4u)
 #define MIDI_PACKET_HEADER                          (0x80) 
 #define MIDI_NOTE_ON_CHANNEL_0                      (0x90)
+#define MIDI_NOTE_OFF_CHANNEL_0                     (0x80)
     
 #define MIDI_NOTE_VELOCITY_OFF                      (0x00)
 #define MIDI_NOTE_VELOCITY_ON                       (0x3F)  
-#define MIDI_NOTE_OFFSET                            (60u)    
+#define MIDI_NOTE_OFFSET                            (60u)
+    
+#define MIDI_FULL_EVENT_SIZE                        (5u)
+#define MIDI_STATUS_INDEX                           (2u)
+#define MIDI_NOTE_VELOCITY_INDEX                    (4u)
     
 #define LOW                                         (0u)
 #define HIGH                                        (1u)    
