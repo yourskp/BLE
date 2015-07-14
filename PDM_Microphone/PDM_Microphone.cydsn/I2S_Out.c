@@ -70,6 +70,8 @@ void I2S_Initialise(void)
 {
     I2S_Start();
     
+    PDN_Write(ON);
+    
     i2sStreaming = 0;
 }
 

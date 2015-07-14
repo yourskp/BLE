@@ -50,13 +50,16 @@
 /*****************************************************
 *                  Configuration flags
 *****************************************************/
-#define ENABLE_PDM_INPUT                    0 /* Set this to 1 for routing PDM data input GPIO to integrator block.
+#define ENABLE_PDM_INPUT                    1 /* Set this to 1 for routing PDM data input GPIO to integrator block.
                                                * Set this to 0 to simulate PDM data internally (PDM data input set high)*/
-#define ENABLE_I2S_OUTPUT                   0 /* Set this to 1 to route PDM output to I2S for testing purposes */    
+#define ENABLE_I2S_OUTPUT                   1 /* Set this to 1 to route PDM output to I2S for testing purposes */    
 #define DEBUG_ENABLE                        1 /* Set this to 1 for enabling debug signals */
     
 #define TRUE                                1
 #define FALSE                               0
+    
+#define ON                                  1
+#define OFF                                 0
     
 #endif /* End of #if !defined(CONFIGURATION_H) */
 

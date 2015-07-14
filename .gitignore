@@ -239,3 +239,4 @@ pip-log.txt
 
 *.uvproj
 **/Simulation/
+**/Generated_Source/

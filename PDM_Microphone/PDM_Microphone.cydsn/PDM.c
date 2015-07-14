@@ -148,11 +148,11 @@ CY_ISR(PDM_Integrator_Comb_isr)
 	PDM_Integrator_diff3_reg = diff2;
 	PDM_Integrator_diff4_reg = diff3;	
 	
-	/* diff4 has a 24 bit audio result, extract the upper 16 bits of the 24 bit value */
-	diff4 = diff4 >> 8;
+	/* diff4 has a 31 bit audio result, extract the upper 16 bits of the 31 bit value */
+	diff4 = diff4 >> 15;
 
-	outVal = (diff3 ^ 0x8000) & 0xFFFF;
-	PDM_Integrator_outBuf[dataIndex] = outVal;
+	//outVal = (diff4 ^ 0x8000) & 0xFFFF;
+	PDM_Integrator_outBuf[dataIndex] = diff4;
 	
 	dataIndex++;
     
@@ -167,8 +167,8 @@ CY_ISR(PDM_Integrator_Comb_isr)
 	}
     
 #if ENABLE_I2S_OUTPUT
-    I2S_WriteByte(HI8(outVal), 0);
-    I2S_WriteByte(LO8(outVal), 0);
+    I2S_WriteByte(HI8(diff4), 0);
+    I2S_WriteByte(LO8(diff4), 0);
         
     if(I2S_IsStreaming() == FALSE)
     {
