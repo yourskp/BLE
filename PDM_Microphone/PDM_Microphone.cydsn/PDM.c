@@ -56,7 +56,7 @@ uint32 PDM_Integrator_diff1_reg = 0;
 uint32 PDM_Integrator_diff2_reg = 0;
 uint32 PDM_Integrator_diff3_reg = 0;
 uint32 PDM_Integrator_diff4_reg = 0;
-int16 PDM_Integrator_outBuf[128];
+int32 PDM_Integrator_outBuf[128];
 uint32 Integrator[128];
 
 uint8 dataIndex = 0;	/* Data buffer index */
@@ -148,7 +148,7 @@ CY_ISR(PDM_Integrator_Comb_isr)
 	PDM_Integrator_diff3_reg = diff2;
 	PDM_Integrator_diff4_reg = diff3;	
 	
-	/* diff4 has a 31 bit audio result, extract the upper 16 bits of the 31 bit value */
+	/* diff4 has a 31 bit audio result, extract the upper 24 bits of the 31 bit value */
 	diff4 = diff4 >> 15;
 
 	//outVal = (diff4 ^ 0x8000) & 0xFFFF;
@@ -156,19 +156,28 @@ CY_ISR(PDM_Integrator_Comb_isr)
 	
 	dataIndex++;
     
-	if (dataIndex == (sizeof(PDM_Integrator_outBuf)/2)) 
+	if (dataIndex == (sizeof(PDM_Integrator_outBuf)/4))
 	{
 		dataIndex = 0;
 	}
 	
+#if 0    
 	if (!outStart && dataIndex == sizeof(PDM_Integrator_outBuf)/6)
 	{
 		outStart = 1; /* Use this to trigger audio output process */
 	}
+#endif    
     
 #if ENABLE_I2S_OUTPUT
-    I2S_WriteByte(HI8(diff4), 0);
-    I2S_WriteByte(LO8(diff4), 0);
+    /* Left channel */
+    //I2S_WriteByte(HI16(LO8(diff4)), I2S_TX_LEFT_CHANNEL);
+    I2S_WriteByte(LO16(HI8(diff4)), I2S_TX_LEFT_CHANNEL);
+    I2S_WriteByte(LO16(LO8(diff4)), I2S_TX_LEFT_CHANNEL);
+    
+    /* Right channel */
+    //I2S_WriteByte(HI16(LO8(diff4)), I2S_TX_RIGHT_CHANNEL);
+    I2S_WriteByte(LO16(HI8(diff4)), I2S_TX_RIGHT_CHANNEL);
+    I2S_WriteByte(LO16(LO8(diff4)), I2S_TX_RIGHT_CHANNEL);
         
     if(I2S_IsStreaming() == FALSE)
     {

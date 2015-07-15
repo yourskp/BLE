@@ -52,7 +52,7 @@
 ********************************************************************************
 *
 * Summary:
-*  Initialises systme and runs the firmware main thread
+*  Initialises system and runs the firmware main thread
 *
 * Parameters:
 *  None.
