@@ -83,9 +83,12 @@ void InitializeSystem(void)
     }
     
 #if BLE_COEXISTENCE_ENABLE
+    
+#if ENABLE_TX_RX_INTERRUPTS    
     *(uint32*)(CYREG_RADIO_TX_RX_MUX_REGISTER)&= ~RADIO_TX_RX_MUX_MASK;   /* Clear Previous mux selection */
     *(uint32*)(CYREG_RADIO_TX_RX_MUX_REGISTER) |=  BLESS_MUX_INPUT_MASK;  /* Set BLESS as the source of the mux */
     *(uint32*)(CYREG_BLE_BLESS_RF_CONFIG) |= RADIO_TX_RX_SEL; /* Select Tx enable & Rx enable signals from BLESS as input to mux */
+#endif /* End of  #if ENABLE_TX_RX_INTERRUPTS */
     
     Radio_Control_Interrupt_StartEx(&Radio_Control_ISR);
 #endif /* End of #if BLE_COEXISTENCE_ENABLE */
