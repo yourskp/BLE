@@ -140,9 +140,11 @@ void WCO_ECO_LowPowerStart(void)
     DeepSleep_Write(0);
 #endif /* End of #if DEBUG_ENABLE */
 
+    CySysWdtUnlock(); /* Unlock the WDT registers for modification */
     (void)CySysClkWcoSetPowerMode(CY_SYS_CLK_WCO_LPM);      /* Switch WCO to the low power mode after startup */
     CySysClkSetLfclkSource(CY_SYS_CLK_LFCLK_SRC_WCO);       /* LFCLK is now driven by WCO */
     CySysClkIloStop();                                      /* WCO is running, shut down the ILO */
+    CySysWdtLock(); /* Lock the WCO back */
 
     (void)CySysClkEcoStart(0);  /* It's time to start ECO */
 
