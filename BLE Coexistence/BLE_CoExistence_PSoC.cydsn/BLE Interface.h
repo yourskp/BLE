@@ -53,10 +53,10 @@
 *****************************************************/    
 #define CRYSTAL_STARTUP_TIME                        (15u) /* Startup time = 15 * 61us */    
     
-#define MINIMUM_CONNECTION_INTERVAL                 (790u) /* 790 * 1.25 = 987.5ms */
-#define MAXIMUM_CONNECTION_INTERVAL                 (800u) /* 800 * 1.25 = 1000ms */
-#define SLAVE_LATENCY                               (0u)   /* No slave latency */
-#define SUPERVISION_TIMEOUT                         (500u) /* Supervision timeout of 5 seconds */    
+#define MINIMUM_CONNECTION_INTERVAL                 (790u)  /* 790 * 1.25 = 987.5ms */
+#define MAXIMUM_CONNECTION_INTERVAL                 (800u)  /* 800 * 1.25 = 1000ms */
+#define SLAVE_LATENCY                               (0u)    /* No slave latency */
+#define SUPERVISION_TIMEOUT                         (1000u) /* Supervision timeout of 10 seconds */    
     
 #define INITIAL_HEART_RATE_VALUE                    (60u) /* Initial value of notification to be used */
     

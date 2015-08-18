@@ -140,7 +140,7 @@ inline void BLE_Run(void)
         {
             initCount++;
         }
-        else
+        else if(CyBle_GattGetBusyStatus() != CYBLE_EVT_STACK_BUSY_STATUS)
         {
             notifyValue++;
             
@@ -331,7 +331,7 @@ CY_ISR(Radio_Control_ISR)
     }
     else 
     {
-        /* Falling edge interrupt - Turn on the BLE radio and retain it's previous state */
+        /* Falling edge interrupt - Turn on the BLE radio and retain its previous state */
         CYREG_BLE_BLERD_CFG1_REG = CYREG_BLE_BLERD_CFG1_REG & (~RADIO_SHUTDOWN_MASK);
     }
     

@@ -52,7 +52,7 @@
 *****************************************************/
 #define ENABLE_900_XTAL_STARTUP     1  /* Required to configure slave clock accuracy to 50ppm. Don't disable this */
 #define CON_PARAM_UPDATE            1  /* When enabled, updated BLE connection interval to 1 second */
-#define SEND_NOTIFICATIONS          0  /* Enables firmware to send HRM notifications when CCCD is enabled */
+#define SEND_NOTIFICATIONS          1  /* Enables firmware to send HRM notifications when CCCD is enabled */
 #define NOTIF_INTERVAL_FOUR_SEC     0  /* Sends HRM notification once in 4 connection intervals. If connection interval 
                                         * is 1 sec, then the firmware sends notifications every 4 seconds */
 #define DEBUG_ENABLE                1  /* Enables GPIO toggling on different power modes. Poor man's power profiler */
