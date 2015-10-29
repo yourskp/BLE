@@ -1,9 +1,9 @@
 /******************************************************************************
-* Project Name		: Low_Power_Startup
+* Project Name		: Long Characteristic Read Write
 * File Name			: Init.c
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
-* Software Used		: PSoC Creator 3.1 SP2
+* Software Used		: PSoC Creator 3.2
 * Compiler    		: ARM GCC 4.8.4
 * Related Hardware	: CY8CKIT-042-BLE Bluetooth Low Energy Pioneer Kit 
 * Owner				: kris@cypress.com
@@ -47,14 +47,6 @@
 #include <Configuration.h>
 #include <LowPower.h>
 #include <Project.h>
-#include <WatchdogTimer.h>
-
-#if LOW_POWER_STARTUP_ENABLE
-/***************************************
-*    Function declarations
-***************************************/
-void WCO_ECO_LowPowerStart(void);    
-#endif /* End of #if LOW_POWER_STARTUP_ENABLE */
 
 /*******************************************************************************
 * Function Name: InitializeSystem
@@ -74,32 +66,16 @@ void InitializeSystem(void)
 {
     CyGlobalIntEnable;      /* Enable Global Interrupts*/
     
+    /* Internal low power oscillator is no longer required after Watch Crystal oscillator is started */
+    CySysClkIloStop();
+    
     /* Set the divider for ECO, ECO will be used as source when IMO is switched off to save power */
     CySysClkWriteEcoDiv(CY_SYS_CLK_ECO_DIV8);
-
-#if LOW_POWER_STARTUP_ENABLE
-        
-    /* If LOW_POWER_STARTUP_ENABLE is set, then do the following for achieving lowest possible WCO & ECO startup current:
-     * 1. Shut down the ECO (to reduce power consumption while WCO is starting)
-     * 2. Enable WDT counter 0 to wakeup the system after 500ms (500ms = WCO startup time)
-     * 3. Configure PSoC 4 BLE device in DeepSleep mode for the 500ms WCO startup time
-     * 4. After WCO is enabled, restart the ECO so that BLESS interface can function
-     * 5. Enable WDT counter 1 to wakeup the system after 1ms (1ms = ECO startup time)
-     * 5. Configure PSoC 4 BLE device in DeepSleep mode for the 1ms ECO startup time */
-    
-    CySysClkEcoStop();      /* Shutdown the ECO and later re-start in low power mode after WCO is turned on */
-    
-    WDT_Interrupt_StartEx(WDT_Handler); /* Initialize WDT interrupt */
-    
-    WCO_ECO_LowPowerStart();    /* Enable WCO & ECO in low power mode using WDT counter 0/1 as system wakeup sources respectively */
-    
-#endif /* End of #if LOW_POWER_STARTUP_ENABLE */
     
 #if (CONSOLE_LOG_ENABLE)
     Console_Start();  /* Console log interface */
-    Console_UartPutString("Low power system startup complete\r\n"); 
 #endif /* End of #if (CONSOLE_LOG_ENABLE) */
-
+    
     BLE_Engine_Start();     /* start the BLE interface */
     
     /* Wait for BLE Component to Initialize */
@@ -108,59 +84,5 @@ void InitializeSystem(void)
         CyBle_ProcessEvents(); 
     }
 }
-
-#if LOW_POWER_STARTUP_ENABLE
-/*******************************************************************************
-* Function Name: WCO_LowPowerStart
-********************************************************************************
-* Summary:
-*  Start WCO in low power mode by configuring the system in DeepSleep mode during
-*  WCO startup time(500ms)   
-*
-* Parameters:  
-*  None
-*
-* Return: 
-*  None
-*
-*******************************************************************************/
-void WCO_ECO_LowPowerStart(void)
-{
-    WDT_WcoEcoLpStartSetup();   /* Setup WDT counters to enable low power WCO & ECO startup */
-
-    CySysClkWcoStart();         /* Start the WCO clock */
-    
-    WDT_EnableWcoCounter();     /* Enable WDT's WCO counter (counter 0) */
-    
-#if DEBUG_ENABLE                    
-    DeepSleep_Write(1);
-#endif /* End of #if DEBUG_ENABLE */
-    CySysPmDeepSleep(); /* Wait for the WDT counter 0 interrupt to wake up the device. On wakeup WCO is up & running */
-#if DEBUG_ENABLE                    
-    DeepSleep_Write(0);
-#endif /* End of #if DEBUG_ENABLE */
-
-    CySysWdtUnlock(); /* Unlock the WDT registers for modification */
-    (void)CySysClkWcoSetPowerMode(CY_SYS_CLK_WCO_LPM);      /* Switch WCO to the low power mode after startup */
-    CySysClkSetLfclkSource(CY_SYS_CLK_LFCLK_SRC_WCO);       /* LFCLK is now driven by WCO */
-    CySysClkIloStop();                                      /* WCO is running, shut down the ILO */
-    CySysWdtLock(); /* Lock the WCO back */
-
-    (void)CySysClkEcoStart(0);  /* It's time to start ECO */
-
-    WDT_EnableEcoCounter();     /* Enable WDT's ECO counter (counter 1) */
-    
-#if TIMING_DEBUG_ENABLE                    
-    DeepSleep_Write(1);
-#endif    
-    CySysPmDeepSleep();  /* Wait for the WDT counter 1 interrupt to wake up the device. On wakeup ECO is up & running */
-#if TIMING_DEBUG_ENABLE                    
-    DeepSleep_Write(0);
-#endif
-
-    WDT_DisableWcoEcoCounters();
-}
-
-#endif /*End of #if LOW_POWER_STARTUP_ENABLE */
 
 /* [] END OF FILE */

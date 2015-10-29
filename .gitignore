@@ -236,7 +236,9 @@ pip-log.txt
 *.uvopt
 *.html
 *.rpt
+*.txt
 
 *.uvproj
 **/Simulation/
 **/Generated_Source/
+**/BLE_v2_10.cylib/
