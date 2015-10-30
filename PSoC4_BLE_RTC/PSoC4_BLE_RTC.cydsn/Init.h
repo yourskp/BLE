@@ -3,8 +3,8 @@
 * File Name			: Init.h
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
-* Software Used		: PSoC Creator 3.1 SP1
-* Compiler    		: ARM GCC 4.8.4
+* Software Used		: PSoC Creator 3.3
+* Compiler    		: ARM GCC 4.9
 * Related Hardware	: CY8CKIT-042-BLE Bluetooth Low Energy Pioneer Kit 
 * Owner				: kris@cypress.com
 *
