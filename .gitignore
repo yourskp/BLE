@@ -240,3 +240,5 @@ pip-log.txt
 *.uvproj
 **/Simulation/
 **/Generated_Source/
+**/PSoC4_BLE_FreeRTOS/
+**/Performance Measurement
