@@ -3,7 +3,7 @@
 * File Name			: LowPower.h
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
-* Software Used		: PSoC Creator 3.1 SP1
+* Software Used		: PSoC Creator 3.3 SP1
 * Compiler    		: ARM GCC 4.8.4
 * Related Hardware	: CY8CKIT-042-BLE Bluetooth Low Energy Pioneer Kit 
 * Owner				: kris@cypress.com
@@ -84,6 +84,8 @@ typedef enum {
 #define CYREG_BLE_BLELL_EVENT_ENABLE_REG        (* (reg32 *) (CYREG_BLE_BLELL_EVENT_ENABLE))
 #define ADVERTISEMENT_INTERRUPT_MASK            0x00000001
 #define CONNECTION_INTERRUPT_MASK               0x00000008
+    
+#define DSM_EXITED_INTERRUPT_MASK               0x00000002    
 #endif /* End of #if BLE_COEXISTENCE_ENABLE */
 
 /*****************************************************

@@ -3,7 +3,7 @@
 * File Name			: BLE Interface.c
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
-* Software Used		: PSoC Creator 3.1 SP1
+* Software Used		: PSoC Creator 3.3 SP1
 * Compiler    		: ARM GCC 4.8.4
 * Related Hardware	: CY8CKIT-042-BLE Bluetooth Low Energy Pioneer Kit 
 * Owner				: kris@cypress.com
@@ -201,9 +201,11 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
 #endif /* End of #if ENABLE_900_XTAL_STARTUP */
 
 #if ENABLE_TX_RX_INTERRUPTS
+#if (ENABLE_EARLY_NOTIFICATION == 0)    
             /* Enable Tx/Rx interrupt for advertisement and connection state */
             CYREG_BLE_BLELL_CONN_INTR_MASK_REG = CYREG_BLE_BLELL_CONN_INTR_MASK_REG | START_CE_INTERRUPT_ENABLE_MASK;
             CYREG_BLE_BLELL_ADV_CONFIG_REG = CYREG_BLE_BLELL_ADV_CONFIG_REG | START_ADV_INTERRUPT_ENABLE_MASK;
+#endif    
 #endif    
 
             /* Put the device into discoverable mode so that remote can search it. */
@@ -220,7 +222,8 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
                 
                 if(intEvent & CONNECTION_INTERRUPT_MASK)
                 {
-                    /* See if this is an advertisement start/stop interrupt and update BT_Req accordingly */
+#if (ENABLE_EARLY_NOTIFICATION == 0)
+                    /* See if this is a connection start/stop interrupt and update BT_Req accordingly */
                     if(CYREG_BLE_BLELL_CONN_INTR_REG & START_CE_MASK)
                     {
                         BT_Req_Write(1);
@@ -228,7 +231,8 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
                         /* Clear the CE start interrupt */
                         CYREG_BLE_BLELL_CONN_INTR_REG = CYREG_BLE_BLELL_CONN_INTR_REG & (~START_CE_MASK);
                     }
-                    
+#endif
+
                     if(CYREG_BLE_BLELL_CONN_INTR_REG & CLOSE_CE_MASK)
                     {
                         BT_Req_Write(0);
@@ -239,7 +243,8 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
                 
                 if (intEvent & ADVERTISEMENT_INTERRUPT_MASK )
                 {
-                    /* See if this is a connection start/stop interrupt and update BT_Req accordingly */
+#if (ENABLE_EARLY_NOTIFICATION == 0)                    
+                    /* See if this is a advertisement start/stop interrupt and update BT_Req accordingly */
                     if(CYREG_BLE_BLELL_ADV_INTR_REG & START_ADV_MASK)
                     {
                         BT_Req_Write(1);
@@ -247,6 +252,7 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
                         /* Clear the ADV start interrupt */
                         CYREG_BLE_BLELL_ADV_INTR_REG = CYREG_BLE_BLELL_ADV_INTR_REG & (~START_ADV_MASK);
                     }
+#endif                    
                     
                     if(CYREG_BLE_BLELL_ADV_INTR_REG & CLOSE_ADV_MASK)
                     {
@@ -256,6 +262,19 @@ void BLE_StackEventHandler(uint32 event, void* eventParam)
                     }
                 }
             }
+#if ENABLE_EARLY_NOTIFICATION
+            else
+            {
+                /* This is BLESS DeepSleep enter/exit interrupt */
+                
+                /* Check if the interrupt is for BLESS DeepSleep exit, if yes, assert the BT_Req Co-existence signal */
+                if(CYREG_BLE_BLESS_LL_DSM_INTR_STAT_REG & DSM_EXITED_INTERRUPT_MASK)
+                {
+                    BT_Req_Write(1);
+                }
+            }
+#endif    
+            
         break;
 #endif    
             

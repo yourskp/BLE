@@ -3,7 +3,7 @@
 * File Name			: Configuration.h
 * Version 			: 1.0
 * Device Used		: CY8C4247LQI-BL483
-* Software Used		: PSoC Creator 3.1 SP1
+* Software Used		: PSoC Creator 3.3 SP1
 * Compiler    		: ARM GCC 4.8.4
 * Related Hardware	: CY8CKIT-042-BLE Bluetooth Low Energy Pioneer Kit 
 * Owner				: kris@cypress.com
@@ -61,6 +61,9 @@
 #if BLE_COEXISTENCE_ENABLE    
 #define ENABLE_TX_RX_INTERRUPTS     1  /* Enable this to generate firmware control of BLE Tx/Rx signals for 
                                         * Co-existence */
+#define ENABLE_EARLY_NOTIFICATION   1  /* If enabled, the firmware will indicate that the RF event is active 900us 
+                                        * before the actual ADV or Connection start event. Note that this will only work
+                                        * if the BLESS is configured in DeepSleep mode after each ADV or Connection event*/
 #endif    
     
 #if CON_PARAM_UPDATE
